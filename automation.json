@@ -1,0 +1,1899 @@
+{
+  "name": "MOTO_CAR_Cleaned",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        768
+      ],
+      "id": "eb923140-a979-452f-a8e9-4c870a63b373",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {kod_czesci: \"EXAMPLE_CODE\"}\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        -1072
+      ],
+      "id": "ba4c7557-cdda-434c-9b32-7ccba5d78a93",
+      "name": "BAG"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "APIoauthurl",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "client_credentials"
+            },
+            {
+              "name": "scope",
+              "value": "allinone"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        -192,
+        -624
+      ],
+      "id": "c2921cee-998d-401a-9629-8504782c5cb7",
+      "name": "IC_Autoryzacja",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "APIurl",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "index",
+              "value": "={{ $json.szukany_index }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('IC_Autoryzacja').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "pl"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        256,
+        -624
+      ],
+      "id": "36ef04e2-6ba3-40b5-9819-1ca122a84bf5",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prefiksy = [\n  '',\n  'FE',\n  'OP',\n  'ATE',\n  'TRW',\n  'BR',\n  'VI',\n  'KH',\n  'MO',\n  'NGK',\n  'SKF',\n  'CH',\n  'SA',\n  'LU',\n  'MO',\n  'ADG',\n  'PUR',\n  'GAT',\n  'SKF',\n  'INA',\n  'DEL',\n  'MAN',\n  'KYB',\n  'HUF',\n  'ELB',\n  'HUF',\n  'GSP',\n  'BER',\n];\n\nconst output = [];\n\nfor (const item of $input.all()) {\n  const czystyKod = $('BAG').item.json.kod_czesci;\n  \n  for (const pref of prefiksy) {\n    output.push({\n      json: {\n        oryginalny_kod: czystyKod,\n        szukany_index: pref + czystyKod\n      }\n    });\n  }\n}\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        32,
+        -624
+      ],
+      "id": "6335b950-3a3f-41e1-a2a4-56d25f2fadf0",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8f5baa74-f370-400f-9694-c794a8a0a328",
+              "leftValue": "={{ $json.products }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        480,
+        -624
+      ],
+      "id": "aa779fc2-9d08-42cc-bc2c-3a6453ec436d",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "3bfb9e80-6a0a-4c4e-b07f-a80b0d8ca950",
+              "leftValue": "={{ $('HTTP Request1').item.json.products }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.3,
+      "position": [
+        704,
+        -624
+      ],
+      "id": "8f199368-05da-40d1-968b-72e9a94d9ec4",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "const wejscie = $input.item.json;\nconst czesc = (wejscie.products && wejscie.products.length > 0) ? wejscie.products[0] : wejscie;\n\nconst wiersz = {};\nfor (let i = 1; i <= 43; i++) {\n    const klucz = 'p' + i.toString().padStart(2, '0');\n    wiersz[klucz] = \"\";\n}\n\nwiersz.p01 = czesc.articleNumber || czesc.tecDoc || \"\";\nwiersz.p02 = czesc.shortDescription || \"\";\nwiersz.p30 = czesc.index || \"\"; \nwiersz.p35 = {{ $json.rabat_marki }};\nwiersz.p21 = {{ $json.kod_marki }};\n\nwiersz.p03 = \"2\";\nwiersz.p04 = \"szt\";\nwiersz.p05 = \"D0081\";\nwiersz.p06 = \"PLN\";\nwiersz.p07 = \"A\";\nwiersz.p13 = \"T\";\nwiersz.p17 = \"T\";\nwiersz.p34 = \"PLN\";\nwiersz.p39 = \"T\";\nwiersz.p40 = \"N\";\n\nreturn [wiersz];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        928,
+        -624
+      ],
+      "id": "6ccad166-41be-463b-968c-d3fc07c92956",
+      "name": "domkniecie i zapis"
+    },
+    {
+      "parameters": {
+        "jsCode": "const wejscie = $input.item.json;\n\nconst wiersz_plik1 = {};\nfor (let i = 1; i <= 20; i++) {\n    const klucz = 'p' + i.toString().padStart(2, '0');\n    wiersz_plik1[klucz] = \"\";\n}\n\nwiersz_plik1.p01 = wejscie.indeks ? wejscie.indeks.substring(4) + \"/\" + wejscie.kod_marki : \"\";\n\nwiersz_plik1.p02 = wejscie.nazwa || \"\";\n\nwiersz_plik1.p14 = wejscie.indeks || \"\"; \nwiersz_plik1.p17 = wejscie.rabat_marki;\nwiersz_plik1.p10 = wejscie.kod_marki;\nwiersz_plik1.p11 = \"5%\";\nwiersz_plik1.p12 = \"5%\";\nwiersz_plik1.p15 = wejscie.cena_netto || \"\";\n\nwiersz_plik1.p03 = \"2\";\nwiersz_plik1.p04 = \"szt\";\nwiersz_plik1.p05 = \"D1842\";\nwiersz_plik1.p06 = \"PLN\";\nwiersz_plik1.p07 = \"A\";\nwiersz_plik1.p08 = \"T\";\nwiersz_plik1.p09 = \"T\";\nwiersz_plik1.p16 = \"PLN\";\nwiersz_plik1.p18 = \"N\";\nwiersz_plik1.p19 = \"T\";\n\nwiersz_plik1.p13 = \"T\";\nwiersz_plik1.p20 = \"T\"; \n\nconst wiersz_plik3 = {\n    zrodlo_danych: \"z_producent\", \n    brand: wejscie.producent || \"\",\n    index: wejscie.indeks || \"\"\n};\n\nreturn [\n    { json: wiersz_plik1 },\n    { json: wiersz_plik3 }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3392,
+        176
+      ],
+      "id": "a18813e9-a173-4b53-b004-66790af29486",
+      "name": "domkniecie i zapis1"
+    },
+    {
+      "parameters": {
+        "jsCode": "try {\n    let html = $input.item.json.data || $input.item.json.body; \n    \n    let szukanyIndeks = $('Loop Over Items').first().json.Informacja; \n\n    if (!html) {\n        return { error: 'Brak danych HTML w wejściu.' };\n    }\n    if (!szukanyIndeks) {\n        return { error: \"Nie udało się znaleźć pola 'kod_czesci' w węźle 'BAG'.\" };\n    }\n\n    if (typeof html !== 'string') {\n        html = String(html);\n    }\n    \n    szukanyIndeks = String(szukanyIndeks).trim();\n\n    const cheerio = require('cheerio');\n    \n    const $ch = cheerio.load(html);\n\n    const wyciagnijLiczbe = (tekst) => {\n        if (!tekst) return null;\n        const oczyszczony = tekst.replace(',', '.').replace(/[^0-9.-]+/g, '');\n        return oczyszczony ? parseFloat(oczyszczony) : null;\n    };\n\n    let znalezionyProdukt = null;\n\n    $ch('#tableKartoteka tbody tr').each((index, element) => {\n        const wiersz = $ch(element);\n        const indeksNaStronie = wiersz.find('td.indeks').text().trim();\n\n        if (indeksNaStronie.endsWith(szukanyIndeks)) {\n            const tds = wiersz.find('td');\n            \n            if (tds.length >= 9) {\n                znalezionyProdukt = {\n                    id_wewnetrzne: $ch(tds[0]).text().trim(),\n                    cena_netto: wyciagnijLiczbe($ch(tds[1]).text()), \n                    cena_brutto: wyciagnijLiczbe($ch(tds[2]).text()),\n                    indeks: indeksNaStronie,\n                    nazwa: $ch(tds[5]).text().trim(),\n                    producent: $ch(tds[6]).text().trim(),\n                    stan_magazynowy: wyciagnijLiczbe($ch(tds[8]).text()) || $ch(tds[8]).text().trim() \n                };\n                \n                return false; \n            }\n        }\n    });\n\n    if (znalezionyProdukt) {\n        return [znalezionyProdukt];\n    } else {\n        return []; \n    }\n\n} catch (error) {\n    return { error: `Wystąpił krytyczny błąd: ${error.message}` };\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2720,
+        -112
+      ],
+      "id": "4fc33a70-735e-4275-a0ff-939a597d3505",
+      "name": "ekstrakcja danych z html",
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "spreadsheet",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        704,
+        752
+      ],
+      "id": "7c9ca3d3-b7e0-4169-8166-96599331cce7",
+      "name": "Download file",
+      "executeOnce": true,
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        928,
+        752
+      ],
+      "id": "b5a17e48-d6a7-42de-9203-c57d43a64e12",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1376,
+        752
+      ],
+      "id": "5771dc66-baa6-47c4-89d9-41458e15e6f6",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "jsCode": "const prefiksy = [\n  'FE',\n  'OP',\n  'ATE',\n  'TRW',\n  'BR',\n  'VI',\n  'KH',\n  'MO',\n  'NGK',\n  'SKF',\n  'CH',\n  'SA',\n  'LU',\n  'MO',\n  'ADG',\n  'PUR',\n  'GAT',\n  'SKF',\n  'INA',\n  'DEL',\n  'MAN',\n  'KYB',\n  'HUF',\n  'ELB',\n  'HUF',\n  'GSP',\n  'BER',\n  'LP'\n];\n\nconst output = [];\n\nfor (const item of $input.all()) {\n  const surowaWartosc = item.json['Informacja'];\n  \n  if (surowaWartosc === undefined || surowaWartosc === null || surowaWartosc === '') {\n    continue;\n  }\n  \n  const czystyKod = String(surowaWartosc).trim();\n  \n  output.push({\n    json: {\n      oryginalny_kod: czystyKod,\n      szukany_index: czystyKod\n    }\n  });\n  \n  if (czystyKod.length >= 6) {\n    const kodZMyslnikami = czystyKod.slice(0, 3) + '-' + czystyKod.slice(3, 5) + '-' + czystyKod.slice(5);\n    output.push({\n      json: {\n        oryginalny_kod: czystyKod,\n        szukany_index: kodZMyslnikami\n      }\n    });\n  }\n  \n  if (czystyKod.length >= 8) {\n    const kodBosch = czystyKod.slice(0, 1) + ' ' + czystyKod.slice(1, 4) + ' ' + czystyKod.slice(4, 7) + ' ' + czystyKod.slice(7);\n    output.push({\n      json: {\n        oryginalny_kod: czystyKod,\n        szukany_index: kodBosch.trim()\n      }\n    });\n  }\n\n  for (const pref of prefiksy) {\n    output.push({\n      json: {\n        oryginalny_kod: czystyKod,\n        szukany_index: pref + czystyKod\n      }\n    });\n  }\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        -16
+      ],
+      "id": "63036bc4-f6d8-467a-9cc6-f8f0c071c352",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "url": "APIurl",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "index",
+              "value": "={{ $json.szukany_index }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('IC_Autoryzacja1').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "pl"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1824,
+        -16
+      ],
+      "id": "bc79d640-b013-40f2-af92-5ae52c05923c",
+      "name": "HTTP Request2",
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "APIurl",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "client_credentials"
+            },
+            {
+              "name": "scope",
+              "value": "allinone"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        32,
+        192
+      ],
+      "id": "912b3a84-1758-4588-84c3-8b563b04e07c",
+      "name": "IC_Autoryzacja1",
+      "credentials": {
+        "httpBasicAuth": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "YOUR_CREDENTIAL_NAME"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "8f5baa74-f370-400f-9694-c794a8a0a328",
+              "leftValue": "={{ $json.totalResults }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2272,
+        -16
+      ],
+      "id": "752d0118-09ea-46b1-961c-863fb666f058",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "const oryginalnyKod = $('Loop Over Items').first().json['OEM NO.'] || \"\";\n\nconst wiersz = {};\nfor (let i = 1; i <= 2; i++) {\n    const klucz = 'p' + i.toString().padStart(2, '0');\n    wiersz[klucz] = \"\";\n}\n\nwiersz.p01 = oryginalnyKod;\nwiersz.p02 = \"BRAK W KATALOGU INTER CARS\";\nreturn [wiersz];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -192,
+        -848
+      ],
+      "id": "4cc07f30-6d03-4d55-a17a-b09b007e6eb0",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "operation": "xls",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1824,
+        560
+      ],
+      "id": "1cd12d22-0c62-41ae-9c30-c731fe5fba87",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const wejscie = $input.item.json;\nconst czesc = (wejscie.products && wejscie.products.length > 0) ? wejscie.products[0] : wejscie;\nconst cenaNetto = wejscie.lines?.[0]?.price?.customerPriceNet || null;\n\nconst wiersz_plik1 = {};\nfor (let i = 1; i <= 20; i++) {\n    const klucz = 'p' + i.toString().padStart(2, '0');\n    wiersz_plik1[klucz] = \"\";\n}\n\nwiersz_plik1.p01 = czesc.articleNumber + \"/\" + wejscie.kod_marki || czesc.tecDoc || \"\";\nwiersz_plik1.p02 = czesc.shortDescription || \"\";\nwiersz_plik1.p10 = wejscie.kod_marki;\nwiersz_plik1.p11 = \"5%\";\nwiersz_plik1.p12 = \"5%\";\nwiersz_plik1.p15 = cenaNetto;\n\nwiersz_plik1.p14 = czesc.index || \"\"; \n\nwiersz_plik1.p17 = wejscie.rabat_marki;\n\nwiersz_plik1.p03 = \"2\"; wiersz_plik1.p04 = \"szt\"; wiersz_plik1.p05 = \"D0081\";\nwiersz_plik1.p06 = \"PLN\"; wiersz_plik1.p07 = \"A\"; wiersz_plik1.p08 = \"T\";\nwiersz_plik1.p09 = \"T\"; wiersz_plik1.p16 = \"PLN\"; wiersz_plik1.p18 = \"N\";\nwiersz_plik1.p19 = \"T\";\n\nwiersz_plik1.p13 = \"T\";\nwiersz_plik1.p20 = \"T\"; \n\nconst wiersz_plik2 = {\n    zrodlo_danych: \"z_rabatow\", \n    sku: czesc.sku || \"\",\n    index: czesc.index || \"\"\n};\n\nconst wiersz_plik3 = {\n    zrodlo_danych: \"z_producent\",\n    brand: czesc.brand || \"\",\n    index: czesc.index || \"\"\n};\n\nreturn [\n    { json: wiersz_plik1 },\n    { json: wiersz_plik2 },\n    { json: wiersz_plik3 } \n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2624,
+        240
+      ],
+      "id": "04e38370-0e9b-49f9-b886-ac731aa8ef69",
+      "name": "dobreczesci"
+    },
+    {
+      "parameters": {
+        "name": "NOWAFORMAZAPISU20.xls",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        560
+      ],
+      "id": "4a5d9112-7820-4de0-a27e-5a4a414d5b56",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e5a63d17-af5c-4e6f-bd80-fdeff0dd49e2",
+              "leftValue": "={{ $json.indeks }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        2944,
+        -112
+      ],
+      "id": "735c18b6-bbeb-4665-a95d-8476b8999ac0",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "url": "URL",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "szukaj",
+              "value": "={{ $('Loop Over Items').item.json.Informacja }}"
+            },
+            {
+              "name": "pokazCenyKli",
+              "value": "true"
+            },
+            {
+              "name": "pokazDomyslnaTabelke",
+              "value": "true"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Cookie",
+              "value": "ASP.NET_SessionId=YOUR_SESSION_ID"
+            },
+            {
+              "name": "Cookie",
+              "value": ".ASPXAUTH=YOUR_AUTH_TOKEN"
+            },
+            {
+              "name": "Cookie",
+              "value": "NumerFirmyCookie=numerFirmy=YOUR_COMPANY_ID"
+            },
+            {
+              "name": "User-Agent",
+              "value": " Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/149.0.0.0 Safari/537.36 Edg/149.0.0.0"
+            },
+            {
+              "name": "sec-Fetch-mode",
+              "value": "cors"
+            },
+            {
+              "name": "Sec-Ch-Ua",
+              "value": "\"Microsoft Edge\";v=\"149\", \"Chromium\";v=\"149\", \"Not)A;Brand\";v=\"24\""
+            },
+            {
+              "name": "Sec-Chu-Ua-Mobile",
+              "value": "?0"
+            },
+            {
+              "name": "Sec-Chu-Ua-Platform",
+              "value": "\"Windows\""
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2496,
+        -112
+      ],
+      "id": "e0a8316b-cd28-4a8e-b454-087ffdb85793",
+      "name": "MotoLEG",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        480,
+        752
+      ],
+      "id": "05f7c69a-2462-40e1-b552-10df3061d472",
+      "name": "dane_rabat"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/YOUR_DOCUMENT_ID/edit?usp=share_link",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        256,
+        752
+      ],
+      "id": "1340fa8a-8f7c-4752-aaac-647d6f06def3",
+      "name": "rabat",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "spreadsheet",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -192,
+        -1072
+      ],
+      "id": "8670dc40-295f-4833-90fb-54697249580f",
+      "name": "rabat1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "xlsx",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1.1,
+      "position": [
+        32,
+        -1072
+      ],
+      "id": "962b3838-7207-46ef-956a-7427f7bfb685",
+      "name": "dane_rabat1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const glowneDane = $input.item.json;\nconst szukanaMarka = (glowneDane.producent || \"\").toString().trim().toLowerCase();\nconst wierszeExcel = $('dane_rabat').all();\n\nlet znalezionyRabat = 44;\nlet znalezionyKod = \"ATA\";\n\nfor (const wiersz of wierszeExcel) {\n    const markaWExcelu = (wiersz.json.nazwa || \"\").toString().trim().toLowerCase();\n    \n    if (markaWExcelu === szukanaMarka) {\n        znalezionyRabat = wiersz.json.rabat;\n        znalezionyKod = wiersz.json.kod;\n        break;\n    }\n}\n\nreturn [{\n    json: {\n        ...glowneDane,\n        rabat_marki: znalezionyRabat,\n        kod_marki: znalezionyKod\n    }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3136,
+        144
+      ],
+      "id": "80fda3af-b317-4dcc-a0e4-51f97fd9302e",
+      "name": "Algorytm korzystajacy z dane rabat"
+    },
+    {
+      "parameters": {
+        "jsCode": "const glowneDane = $input.item.json;\nconst surowaMarka = glowneDane.products?.[0]?.brand || \"\";\nconst szukanaMarka = surowaMarka.toString().trim().toLowerCase();\nconst wierszeExcel = $('dane_rabat').all();\n\nlet znalezionyRabat = 44;\nlet znalezionyKod = \"ATA\";\n\nfor (const wiersz of wierszeExcel) {\n    const markaWExcelu = (wiersz.json.nazwa || \"\").toString().trim().toLowerCase();\n    \n    if (markaWExcelu === szukanaMarka) {\n        znalezionyRabat = wiersz.json.rabat;\n        znalezionyKod = wiersz.json.kod;\n        break;\n    }\n}\n\nreturn [{\n    json: {\n        ...glowneDane,\n        rabat_marki: znalezionyRabat,\n        kod_marki: znalezionyKod\n    }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2944,
+        368
+      ],
+      "id": "14f5ea06-7b30-4477-96f3-f79937c85a5f",
+      "name": "Algorytm korzystajacy z dane rabat1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const czysteDane = [];\nconst widzianeKody = new Set();\n\nfor (const item of $input.all()) {\n    for (const klucz in item.json) {\n        if (typeof item.json[klucz] === 'string') {\n            item.json[klucz] = item.json[klucz].replace(/[\\t\\r\\n]+/g, '').trim();\n        }\n    }\n\n    let szukanyKod = item.json.Informacja;\n    \n    if (szukanyKod !== undefined && szukanyKod !== null && szukanyKod !== \"\") {\n        if (!widzianeKody.has(szukanyKod)) {\n            widzianeKody.add(szukanyKod);\n            czysteDane.push(item);\n        }\n    }\n}\n\nreturn czysteDane;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        752
+      ],
+      "id": "8e62576c-a46a-410a-9000-962a57d35461",
+      "name": "Code in JavaScript3",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e5a63d17-af5c-4e6f-bd80-fdeff0dd49e2",
+              "leftValue": "={{ $json.nazwa_czesci }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        3616,
+        -208
+      ],
+      "id": "5f1daafb-a2fa-4b92-a4a1-4844239ff118",
+      "name": "If3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const glowneDane = $input.item.json;\nconst szukanaMarka = (glowneDane.producent_skrot || \"\").toString().trim().toLowerCase();\nconst wierszeExcel = $('dane_rabat').all();\n\nlet znalezionyRabat = 44;\nlet znalezionyKod = \"ATA\";\n\nfor (const wiersz of wierszeExcel) {\n    const markaWExcelu = (wiersz.json.nazwa || \"\").toString().trim().toLowerCase();\n    \n    if (markaWExcelu === szukanaMarka) {\n        znalezionyRabat = wiersz.json.rabat;\n        znalezionyKod = wiersz.json.kod;\n        break;\n    }\n}\n\nreturn [{\n    json: {\n        ...glowneDane,\n        rabat_marki: znalezionyRabat,\n        kod_marki: znalezionyKod\n    }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3840,
+        80
+      ],
+      "id": "1f40cef0-cfae-4728-adeb-57dfa9091f25",
+      "name": "Algorytm korzystajacy z dane rabat2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const wejscie = $input.item.json;\n\nconst wiersz_plik1 = {};\nfor (let i = 1; i <= 20; i++) {\n    const klucz = 'p' + i.toString().padStart(2, '0');\n    wiersz_plik1[klucz] = \"\";\n}\n\nwiersz_plik1.p01 = wejscie.kod_czesci_1 + \"/\" + wejscie.kod_marki || \"\";\nwiersz_plik1.p02 = wejscie.nazwa_czesci || \"\";\n\nwiersz_plik1.p14 = wejscie.kod_czesci_1 || \"\"; \nwiersz_plik1.p17 = wejscie.rabat_marki;\nwiersz_plik1.p10 = wejscie.kod_marki || \"\";\nwiersz_plik1.p11 = \"5%\";\nwiersz_plik1.p12 = \"5%\";\nwiersz_plik1.p15 = wejscie.cena;\n\nwiersz_plik1.p03 = \"2\";\nwiersz_plik1.p04 = \"szt\";\nwiersz_plik1.p05 = \"D1189\";\nwiersz_plik1.p06 = \"PLN\";\nwiersz_plik1.p07 = \"A\";\nwiersz_plik1.p08 = \"T\";\nwiersz_plik1.p09 = \"T\";\nwiersz_plik1.p16 = \"PLN\";\nwiersz_plik1.p18 = \"N\";\nwiersz_plik1.p19 = \"T\";\n\nwiersz_plik1.p13 = \"T\";\nwiersz_plik1.p20 = \"T\"; \nconst wiersz_plik3 = {\n    zrodlo_danych: \"z_producent\", \n    brand: wejscie.producent || \"\",\n    index: wejscie.indeks || \"\"\n};\n\nreturn [\n    { json: wiersz_plik1 },\n    { json: wiersz_plik3 }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4064,
+        80
+      ],
+      "id": "bbfd9cd1-36c3-4f83-84e4-a6401aaa4692",
+      "name": "domkniecie i zapis2"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e5a63d17-af5c-4e6f-bd80-fdeff0dd49e2",
+              "leftValue": "={{ $json.nazwa_czesci }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4960,
+        -400
+      ],
+      "id": "dff4cfb6-d8d6-4659-8930-01269fb63384",
+      "name": "If4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const glowneDane = $input.item.json;\nconst szukanaMarka = (glowneDane.producent_skrot || \"\").toString().trim().toLowerCase();\nconst wierszeExcel = $('dane_rabat').all();\n\nlet znalezionyRabat = 44;\nlet znalezionyKod = \"ATA\";\n\nfor (const wiersz of wierszeExcel) {\n    const markaWExcelu = (wiersz.json.nazwa || \"\").toString().trim().toLowerCase();\n    \n    if (markaWExcelu === szukanaMarka) {\n        znalezionyRabat = wiersz.json.rabat;\n        znalezionyKod = wiersz.json.kod;\n        break;\n    }\n}\n\nreturn [{\n    json: {\n        ...glowneDane,\n        rabat_marki: znalezionyRabat,\n        kod_marki: znalezionyKod\n    }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5184,
+        608
+      ],
+      "id": "b595b5ca-c7b8-45ea-bef4-a2b255e6de7b",
+      "name": "Algorytm korzystajacy z dane rabat3"
+    },
+    {
+      "parameters": {
+        "jsCode": "const wejscie = $input.item.json;\n\nconst wiersz = {};\nfor (let i = 1; i <= 105; i++) {\n    const klucz = 'p' + i.toString().padStart(2, '0');\n    wiersz[klucz] = \"\";\n}\n\nwiersz.p01 = wejscie.symbol_dostawcy + \"/\" + wejscie.kod_marki || \"\";\nwiersz.p02 = wejscie.nazwa || \"\";\n\nwiersz.p14 = wejscie.symbol_dostawcy  || \"\"; \nwiersz.p17 = wejscie.rabat_marki;\nwiersz.p10 = wejscie.kod_marki;\nwiersz.p11 = \"5%\";\nwiersz.p12 = \"5%\";\nwiersz.p15 = wejscie.cena_pln_netto;\n\nwiersz.p03 = \"2\";\nwiersz.p04 = \"szt\";\nwiersz.p05 = \"D1842\";\nwiersz.p06 = \"PLN\";\nwiersz.p07 = \"A\";\nwiersz.p08 = \"T\";\nwiersz.p09 = \"T\";\nwiersz.p16 = \"PLN\";\nwiersz.p18 = \"N\";\nwiersz.p19 = \"T\";\n\nwiersz.p13 = \"T\";\nwiersz.p20 = \"T\"; \n\nreturn [wiersz];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        5408,
+        704
+      ],
+      "id": "d0041760-49bc-464e-acee-7e436a228eca",
+      "name": "domkniecie i zapis3"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "INSERT INTO nieznalezione (szukany_kod) \nVALUES ('{{ $('Loop Over Items').item.json.Informacja }}');\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        5184,
+        -16
+      ],
+      "id": "39b48a2e-b982-456d-b564-a9409e8835c0",
+      "name": "zapis nie zczytanych",
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT nazwa_czesci, producent_skrot, kod_czesci_1, cena \nFROM czesci \nWHERE kod_czesci_1 = '{{ $json.szukany_index }}';\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        3392,
+        -208
+      ],
+      "id": "4529705e-6e73-40f9-a85c-10d814eac91a",
+      "name": "AP",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT symbol_motorol, symbol_dostawcy, nazwa, grupa_towarowa, cena_pln_netto \nFROM cennik_motorol \nWHERE symbol_dostawcy = '{{ $json.szukany_index }}';\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4064,
+        -304
+      ],
+      "id": "f5c7234b-ed7c-4c63-8732-7fc4b70e586c",
+      "name": "Motorol",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nconst wejscioweDane = $('Loop Over Items').all();\n\nfor (const item of wejscioweDane) {\n  const surowaWartosc = item.json['Informacja'];\n  \n  if (surowaWartosc === undefined || surowaWartosc === null || surowaWartosc === '') {\n    continue; \n  }\n\n  const czystyKod = String(surowaWartosc).trim();\n  \n  output.push({\n    json: {\n      oryginalny_kod: czystyKod,\n      szukany_index: czystyKod\n    }\n  });\n\n  if (czystyKod.length >= 6) {\n    const kodZMyslnikami = czystyKod.slice(0, 3) + '-' + czystyKod.slice(3, 5) + '-' + czystyKod.slice(5);\n    \n    output.push({\n      json: {\n        oryginalny_kod: czystyKod,\n        szukany_index: kodZMyslnikami\n      }\n    });\n  }\n\n  if (czystyKod.length >= 8) {\n    const kodBosch = czystyKod.slice(0, 1) + ' ' + czystyKod.slice(1, 4) + ' ' + czystyKod.slice(4, 7) + ' ' + czystyKod.slice(7);\n    \n    output.push({\n      json: {\n        oryginalny_kod: czystyKod,\n        szukany_index: kodBosch.trim()\n      }\n    });\n  }\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3168,
+        -208
+      ],
+      "id": "9f4a8b15-7d2d-4f8c-9f9d-ab616c67e89e",
+      "name": "Code in JavaScript4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nconst wejscioweDane = $('Loop Over Items').all();\n\nfor (const item of wejscioweDane) {\n  const surowaWartosc = item.json['Informacja'];\n  \n  if (surowaWartosc === undefined || surowaWartosc === null || surowaWartosc === '') {\n    continue; \n  }\n\n  const czystyKod = String(surowaWartosc).trim();\n  \n  output.push({\n    json: {\n      oryginalny_kod: czystyKod,\n      szukany_index: czystyKod\n    }\n  });\n\n  if (czystyKod.length >= 6) {\n    const kodZMyslnikami = czystyKod.slice(0, 3) + '-' + czystyKod.slice(3, 5) + '-' + czystyKod.slice(5);\n    \n    output.push({\n      json: {\n        oryginalny_kod: czystyKod,\n        szukany_index: kodZMyslnikami\n      }\n    });\n  }\n\n  if (czystyKod.length >= 8) {\n    const kodBosch = czystyKod.slice(0, 1) + ' ' + czystyKod.slice(1, 4) + ' ' + czystyKod.slice(4, 7) + ' ' + czystyKod.slice(7);\n    \n    output.push({\n      json: {\n        oryginalny_kod: czystyKod,\n        szukany_index: kodBosch.trim()\n      }\n    });\n  }\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3840,
+        -304
+      ],
+      "id": "6aeb5ff9-c567-406a-a60d-6e8cdca339f6",
+      "name": "Code in JavaScript5"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "e5a63d17-af5c-4e6f-bd80-fdeff0dd49e2",
+              "leftValue": "={{ $json.nazwa }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        4288,
+        -304
+      ],
+      "id": "0f589e17-37cd-41a8-b60c-91ec93d78e88",
+      "name": "If5"
+    },
+    {
+      "parameters": {
+        "jsCode": "const output = [];\nconst wejscioweDane = $('Loop Over Items').all();\n\nfor (const item of wejscioweDane) {\n  const surowaWartosc = item.json['Informacja'];\n  \n  if (surowaWartosc === undefined || surowaWartosc === null || surowaWartosc === '') {\n    continue; \n  }\n\n  const czystyKod = String(surowaWartosc).trim();\n  \n  output.push({\n    json: {\n      oryginalny_kod: czystyKod,\n      szukany_index: czystyKod\n    }\n  });\n\n  if (czystyKod.length >= 6) {\n    const kodZMyslnikami = czystyKod.slice(0, 3) + '-' + czystyKod.slice(3, 5) + '-' + czystyKod.slice(5);\n    \n    output.push({\n      json: {\n        oryginalny_kod: czystyKod,\n        szukany_index: kodZMyslnikami\n      }\n    });\n  }\n\n  if (czystyKod.length >= 8) {\n    const kodBosch = czystyKod.slice(0, 1) + ' ' + czystyKod.slice(1, 4) + ' ' + czystyKod.slice(4, 7) + ' ' + czystyKod.slice(7);\n    \n    output.push({\n      json: {\n        oryginalny_kod: czystyKod,\n        szukany_index: kodBosch.trim()\n      }\n    });\n  }\n}\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4512,
+        -400
+      ],
+      "id": "fbb43be2-42b0-4911-92de-26eacee95e16",
+      "name": "Code in JavaScript6"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT symbol_motorol, symbol_dostawcy, nazwa, grupa_towarowa, cena_pln_netto \nFROM cennik_motorol \nWHERE symbol_motorol = '{{ $json.szukany_index }}';\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        4736,
+        -400
+      ],
+      "id": "531c0348-113a-43c0-b2cd-607428a4663b",
+      "name": "Motorol1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "postgres": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const glowneDane = $input.item.json;\nconst szukanaMarka = (glowneDane.grupa_towarowa || \"\").toString().trim().toLowerCase();\nconst wierszeExcel = $('dane_rabat').all();\n\nlet znalezionyRabat = 44;\nlet znalezionyKod = \"ATA\";\n\nfor (const wiersz of wierszeExcel) {\n    const markaWExcelu = (wiersz.json.nazwa || \"\").toString().trim().toLowerCase();\n    \n    if (markaWExcelu === szukanaMarka) {\n        znalezionyRabat = wiersz.json.rabat;\n        znalezionyKod = wiersz.json.kod;\n        break;\n    }\n}\n\nreturn [{\n    json: {\n        ...glowneDane,\n        rabat_marki: znalezionyRabat,\n        kod_marki: znalezionyKod\n    }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4512,
+        -16
+      ],
+      "id": "6b85e9e3-367a-4363-819d-a7a62c430825",
+      "name": "Algorytm korzystajacy z dane rabat4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const wejscie = $input.item.json;\n\nconst wiersz = {};\nfor (let i = 1; i <= 20; i++) {\n    const klucz = 'p' + i.toString().padStart(2, '0');\n    wiersz[klucz] = \"\";\n}\n\nwiersz.p01 = wejscie.symbol_dostawcy + \"/\" + wejscie.kod_marki || \"\";\nwiersz.p02 = wejscie.nazwa || \"\";\n\nwiersz.p14 = wejscie.symbol_dostawcy  || \"\"; \nwiersz.p17 = wejscie.rabat_marki;\nwiersz.p10 = wejscie.kod_marki;\nwiersz.p11 = \"5%\";\nwiersz.p12 = \"5%\";\nwiersz.p15 = wejscie.cena_pln_netto;\n\nwiersz.p03 = \"2\";\nwiersz.p04 = \"szt\";\nwiersz.p05 = \"D1842\";\nwiersz.p06 = \"PLN\";\nwiersz.p07 = \"A\";\nwiersz.p08 = \"T\";\nwiersz.p09 = \"T\";\nwiersz.p16 = \"PLN\";\nwiersz.p18 = \"N\";\nwiersz.p19 = \"T\";\n\nwiersz.p13 = \"T\";\nwiersz.p20 = \"T\"; \n\nreturn [wiersz];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        4736,
+        -16
+      ],
+      "id": "7e83cbbd-e40c-4ee4-a759-80beeff25f97",
+      "name": "domkniecie i zapis4"
+    },
+    {
+      "parameters": {
+        "jsCode": "const warianty = $input.all();\nconst znalezionyWariant = warianty.find(item => item.json.totalResults > 0);\n\nif (znalezionyWariant) {\n  return [znalezionyWariant];\n} else {\n  return [warianty[0]];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2048,
+        -16
+      ],
+      "id": "5b6a2103-5c74-44eb-ba21-01dc5430da4c",
+      "name": "usuniecieG"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst doGlownegoPliku = items.filter(item => {\n  if (item.json.success === true || item.json.success === \"TRUE\" || item.json.success === \"true\") return false;\n  \n  if (item.json.zrodlo_danych === \"z_rabatow\") return false;\n\n  if (item.json.zrodlo_danych === \"z_producent\") return false;\n\n  return true; \n});\nreturn doGlownegoPliku;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        560
+      ],
+      "id": "6d65da22-f4dc-4f15-96fc-52033c0074ed",
+      "name": "Code in JavaScript7"
+    },
+    {
+      "parameters": {
+        "jsCode": "const wszystkieDane = $input.all();\nconst daneDlaDrugiegoPliku = wszystkieDane.filter(item => item.json.zrodlo_danych === \"z_rabatow\");\n\nconst gotoweDoZapisu = daneDlaDrugiegoPliku.map(item => {\n  return {\n    json: {\n      \"index\": item.json.index,\n      \"sku\": item.json.sku      \n    }\n  };\n});\n\nreturn gotoweDoZapisu;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        368
+      ],
+      "id": "3902e065-535f-46ef-b1d5-97cb91d70e84",
+      "name": "drugiplik"
+    },
+    {
+      "parameters": {
+        "operation": "xls",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1824,
+        368
+      ],
+      "id": "d0577475-1c56-45eb-ae74-c8b7e843f7b5",
+      "name": "Convert to File1"
+    },
+    {
+      "parameters": {
+        "name": "NOWAFORMAZAPIS20kodIC.xls",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        368
+      ],
+      "id": "d31b4e7b-8201-4984-8645-f7e0e7091eef",
+      "name": "Upload file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const wszystkieDane = $input.all();\nconst items = wszystkieDane.filter(item => item.json.zrodlo_danych === \"z_producent\");\n\nconst results = [];\n\nconst brandMapping = {\n    'FIAT': { col2: 'FIAT', col5: 'FIAT/ALFA ROMEO' },\n    'BMW_MOTO': { col2: 'BMW', col5: 'BMW' },\n    'AUDI': { col2: 'VAG', col5: 'VAG' },\n    'SKODA': { col2: 'VAG', col5: 'VAG' },\n    'SEAT': { col2: 'VAG', col5: 'VAG' },\n    'CUPRA': { col2: 'VAG', col5: 'VAG' },\n    'VW': { col2: 'VAG', col5: 'VAG' },\n    'CHEVROLET': { col2: 'CHEVROLE', col5: 'CHEVROLET' },\n    'GM': { col2: 'OPEL', col5: 'OPEL/GM' },\n    'HONDA_MOTO': { col2: 'HONDA', col5: 'HONDA' },\n    'INFINITI': { col2: 'NISSAN', col5: 'NISSAN' },\n    'LAMBORGHINI': { col2: 'VAG', col5: 'VAG' },\n    'LAND ROVER': { col2: 'LR', col5: 'LAND ROVER' },\n    'MERCEDES': { col2: 'MB', col5: 'MERCEDES' },\n    'MITSUBISHI': { col2: 'MITSUBIS', col5: 'MITSUBISHI' },\n    'RENAULT': { col2: 'REN', col5: 'RENAULT' },\n    'SUZUKI_MOTO': { col2: 'SUZ', col5: 'SUZUKI' },\n    'SUZUKI': { col2: 'SUZ', col5: 'SUZUKI' },\n    'LANCIA': { col2: 'FIAT', col5: 'FIAT/ALFA ROMEO' },\n    'ALFA ROMEO': { col2: 'ALFA ROMEO', col5: 'FIAT/ALFA ROMEO' },\n    'FORD': { col2: 'FORD', col5: 'FORD' },\n    'BMW': { col2: 'BMW', col5: 'BMW' },\n    'VAG': { col2: 'VAG', col5: 'VAG' },\n    'CHRYSLER': { col2: 'CHRYSLER', col5: 'CHRYSLER' },\n    'CITROEN': { col2: 'CITROEN', col5: 'CITROEN' },\n    'HONDA': { col2: 'HONDA', col5: 'HONDA' },\n    'OPEL': { col2: 'OPEL', col5: 'OPEL/GM' },\n    'HYUNDAI': { col2: 'HYUNDAI', col5: 'HYUNDAI' },\n    'IVECO': { col2: 'IVECO', col5: 'IVECO' },\n    'JAGUAR': { col2: 'JAGUAR', col5: 'JAGUAR/LAND ROVER' },\n    'JEEP': { col2: 'JEEP', col5: 'JEEP' },\n    'DODGE': { col2: 'DODGE', col5: 'DODGE' },\n    'KIA': { col2: 'KIA', col5: 'KIA' },\n    'LR': { col2: 'LR', col5: 'LAND ROVER' },\n    'MASERATI': { col2: 'MASERATI', col5: 'MASERATI' },\n    'MAZDA': { col2: 'MAZDA', col5: 'MAZDA' },\n    'MB': { col2: 'MB', col5: 'MERCEDES' },\n    'MITSUBIS': { col2: 'MITSUBIS', col5: 'MITSUBISHI' },\n    'NISSAN': { col2: 'NISSAN', col5: 'NISSAN' },\n    'PEUGEOT': { col2: 'PEUGEOT', col5: 'PEUGEOT' },\n    'PORSCHE': { col2: 'PORSCHE', col5: 'PORSCHE' },\n    'REN': { col2: 'REN', col5: 'RENAULT' },\n    'SSANG': { col2: 'SSANG', col5: 'SSANGYONG' },\n    'STELANTI': { col2: 'STELANTI', col5: 'STELANTIS' },\n    'SUBARU': { col2: 'SUBARU', col5: 'SUBARU' },\n    'SUZ': { col2: 'SUZ', col5: 'SUZUKI' },\n    'TOYOTA': { col2: 'TOYOTA', col5: 'TOYOTA' },\n    'VOLVO': { col2: 'VOLVO', col5: 'VOLVO' }\n};\n\nfor (const item of items) {\n    const row = item.json;\n    \n    const indeks = row.index ?? '';\n    const marka = row.brand ?? '';\n\n    const col1 = `${indeks}/RMX`; \n    const col3 = indeks;\n    const col4 = 'T';\n    const col6 = 'N';\n    \n    let col2 = 'OE'; \n    let col5 = 'OE'; \n    \n    if (typeof marka === 'string' && marka.trim() !== '') {\n        const prodUpper = marka.trim().toUpperCase();\n        \n        if (brandMapping[prodUpper] !== undefined) {\n            col2 = brandMapping[prodUpper].col2;\n            col5 = brandMapping[prodUpper].col5;\n        }\n    }\n    \n    results.push({\n        json: {\n            A: col1,\n            B: col2,\n            C: col3,\n            D: col4,\n            E: col5,\n            F: col6\n        }\n    });\n}\n\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1600,
+        176
+      ],
+      "id": "fd12d668-7ad7-4183-bbf7-f41169555fcf",
+      "name": "trzeci plik"
+    },
+    {
+      "parameters": {
+        "operation": "xls",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        1824,
+        176
+      ],
+      "id": "6c6dc2f1-d521-46bf-ae7d-96f99c20dd75",
+      "name": "Convert to File2"
+    },
+    {
+      "parameters": {
+        "name": "znaleziony_prducentf3.xls",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "root",
+          "cachedResultName": "/ (Root folder)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        2048,
+        176
+      ],
+      "id": "2c1e56c8-83d1-439f-8a2b-aa5dbc95d1fa",
+      "name": "Upload file2",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "YOUR_CREDENTIAL_ID",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return [\n  {szukany_index: \"EXAMPLE_INDEX\"}\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        496,
+        176
+      ],
+      "id": "5b9b1769-7848-4c15-91e5-784e9c4f502d",
+      "name": "Code in JavaScript8"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "APIurl",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('IC_Autoryzacja1').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "pl"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "=[\n  {\n    \"SKU\": \"{{ $('HTTP Request2').item.json.products[0].sku }}\", \n    \"quantity\": 1\n  }\n]\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        1008,
+        -288
+      ],
+      "id": "2cf55286-eda2-4279-a707-f51fb4fc1efa",
+      "name": "HTTP Request3",
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "APIurl",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "=Bearer {{ $('IC_Autoryzacja1').item.json.access_token }}"
+            },
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "pl"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"lines\": [\n    {\n      \"sku\": \"{{ $json.products[0].sku }}\",\n      \"quantity\": 1\n    }\n  ]\n}\n\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.4,
+      "position": [
+        2368,
+        176
+      ],
+      "id": "aa964f57-9ae7-407e-b08f-1bab6c68f63e",
+      "name": "cenaIC",
+      "alwaysOutputData": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2592,
+        48
+      ],
+      "id": "6759ff6e-caf8-491d-a2eb-21ecd826386f",
+      "name": "Merge"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "IC_Autoryzacja1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "BAG": {
+      "main": [
+        []
+      ]
+    },
+    "IC_Autoryzacja": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "domkniecie i zapis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "ekstrakcja danych z html": {
+      "main": [
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript7",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "drugiplik",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "trzeci plik",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "IC_Autoryzacja1": {
+      "main": [
+        [
+          {
+            "node": "rabat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request2": {
+      "main": [
+        [
+          {
+            "node": "usuniecieG",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "MotoLEG",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "cenaIC",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        []
+      ]
+    },
+    "dobreczesci": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript4",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Algorytm korzystajacy z dane rabat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MotoLEG": {
+      "main": [
+        [
+          {
+            "node": "ekstrakcja danych z html",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dane_rabat": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "rabat": {
+      "main": [
+        [
+          {
+            "node": "dane_rabat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "rabat1": {
+      "main": [
+        [
+          {
+            "node": "dane_rabat1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "dane_rabat1": {
+      "main": [
+        [
+          {
+            "node": "BAG",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Algorytm korzystajacy z dane rabat": {
+      "main": [
+        [
+          {
+            "node": "domkniecie i zapis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Algorytm korzystajacy z dane rabat1": {
+      "main": [
+        [
+          {
+            "node": "dobreczesci",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "domkniecie i zapis1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If3": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Algorytm korzystajacy z dane rabat2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Algorytm korzystajacy z dane rabat2": {
+      "main": [
+        [
+          {
+            "node": "domkniecie i zapis2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "domkniecie i zapis2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If4": {
+      "main": [
+        [
+          {
+            "node": "zapis nie zczytanych",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Algorytm korzystajacy z dane rabat3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Algorytm korzystajacy z dane rabat3": {
+      "main": [
+        [
+          {
+            "node": "domkniecie i zapis3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "zapis nie zczytanych": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "domkniecie i zapis3": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AP": {
+      "main": [
+        [
+          {
+            "node": "If3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Motorol": {
+      "main": [
+        [
+          {
+            "node": "If5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript4": {
+      "main": [
+        [
+          {
+            "node": "AP",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript5": {
+      "main": [
+        [
+          {
+            "node": "Motorol",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If5": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Algorytm korzystajacy z dane rabat4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript6": {
+      "main": [
+        [
+          {
+            "node": "Motorol1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Algorytm korzystajacy z dane rabat4": {
+      "main": [
+        [
+          {
+            "node": "domkniecie i zapis4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Motorol1": {
+      "main": [
+        [
+          {
+            "node": "If4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "domkniecie i zapis4": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "usuniecieG": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript7": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "drugiplik": {
+      "main": [
+        [
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Upload file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "trzeci plik": {
+      "main": [
+        []
+      ]
+    },
+    "Convert to File2": {
+      "main": [
+        []
+      ]
+    },
+    "Code in JavaScript8": {
+      "main": [
+        []
+      ]
+    },
+    "cenaIC": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Algorytm korzystajacy z dane rabat1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "YOUR_VERSION_ID",
+  "meta": {
+    "instanceId": "YOUR_INSTANCE_ID"
+  },
+  "nodeGroups": [],
+  "id": "YOUR_WORKFLOW_ID",
+  "tags": []
+}
